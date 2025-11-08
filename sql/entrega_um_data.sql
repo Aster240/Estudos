@@ -1,4 +1,4 @@
-USE entrega_nomeEquipe;
+USE entrega_final_grupo05;
 
 INSERT INTO cursos (id_curso, nome, coordenador, carga_horaria_total) VALUES
 (1, 'Ciência da Computação', 'Dr. Alan Turing', 3200),

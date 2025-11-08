@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS entrega_nomeEquipe;
-USE entrega_nomeEquipe;
+CREATE DATABASE IF NOT EXISTS entrega_final_grupo05;
+USE entrega_final_grupo05;
 
 CREATE TABLE professores(
     id_professor INT AUTO_INCREMENT PRIMARY KEY,
@@ -68,7 +68,7 @@ CREATE TABLE turmas(
     fk_id_professor INT NOT NULL,
     fk_id_semestre INT NOT NULL,
     maximo_vagas INT,
-    vagas_ocupadas INT DEFAULT 0, 
+    vagas_ocupadas INT DEFAULT 0,
     CONSTRAINT fk_id_disciplina_turmas FOREIGN KEY (fk_id_disciplina) REFERENCES disciplinas(id_disciplina),
     CONSTRAINT fk_id_professor_turmas FOREIGN KEY (fk_id_professor) REFERENCES professores(id_professor),
     CONSTRAINT fk_id_semestre_turmas FOREIGN KEY (fk_id_semestre) REFERENCES semestres(id_semestre)
@@ -114,7 +114,7 @@ CREATE TABLE log_sistema(
     CONSTRAINT fk_usuario_log_sistema FOREIGN KEY (fk_usuario) REFERENCES usuarios(id_usuario)
 );
 
--- Views -- 
+-- Views --
 
 CREATE VIEW vw_BoletimAluno AS
 SELECT
@@ -125,44 +125,44 @@ SELECT
     p.nome AS Professor,
     m.nota_final AS NotaFinal,
     m.status AS Status
-FROM 
+FROM
     matriculas m
-JOIN 
+JOIN
     alunos a ON m.fk_id_aluno = a.id_aluno
-JOIN 
+JOIN
     turmas t ON m.fk_id_turma = t.id_turma
-JOIN 
+JOIN
     disciplinas d ON t.fk_id_disciplina = d.id_disciplina
-JOIN 
+JOIN
     professores p ON t.fk_id_professor = p.id_professor
-JOIN 
+JOIN
     semestres s ON t.fk_id_semestre = s.id_semestre;
 
 SELECT * FROM vw_BoletimAluno WHERE id_aluno = 1;
 
 CREATE VIEW vw_TurmasDisponiveis AS
-SELECT 
+SELECT
     t.id_turma,
     d.nome AS Disciplina,
     p.nome AS Professor,
     s.codigo AS Semestre,
     (t.maximo_vagas - t.vagas_ocupadas) AS VagasRestantes
-FROM 
+FROM
     turmas t
-JOIN 
+JOIN
     disciplinas d ON t.fk_id_disciplina = d.id_disciplina
-JOIN 
+JOIN
     professores p ON t.fk_id_professor = p.id_professor
-JOIN 
+JOIN
     semestres s ON t.fk_id_semestre = s.id_semestre
-WHERE 
+WHERE
     s.aberto_p_matricula = TRUE
     AND t.vagas_ocupadas < t.maximo_vagas;
 
 
 
 CREATE VIEW vw_DesempenhoTurma AS
-SELECT 
+SELECT
     d.nome AS Disciplina,
     p.nome AS Professor,
     s.codigo AS Semestre,
@@ -170,34 +170,34 @@ SELECT
     AVG(m.nota_final) AS MediaNotas,
     SUM(CASE WHEN m.status = 'Aprovado' THEN 1 ELSE 0 END) AS TotalAprovados,
     SUM(CASE WHEN m.status = 'Reprovado' THEN 1 ELSE 0 END) AS TotalReprovados
-FROM 
+FROM
     matriculas m
-JOIN 
+JOIN
     turmas t ON m.fk_id_turma = t.id_turma
-JOIN 
+JOIN
     disciplinas d ON t.fk_id_disciplina = d.id_disciplina
-JOIN 
+JOIN
     professores p ON t.fk_id_professor = p.id_professor
-JOIN 
+JOIN
     semestres s ON t.fk_id_semestre = s.id_semestre
 WHERE
     m.status IN ('Aprovado', 'Reprovado') -- Só calcula média de quem já concluiu
-GROUP BY 
+GROUP BY
     t.id_turma, d.nome, p.nome, s.codigo;
 
 
 
 CREATE VIEW vw_LogAuditoria AS
-SELECT 
+SELECT
     id_log,
     fk_usuario,
     acao,
     tabela_afetada,
     data_hora,
     descricao
-FROM 
+FROM
     log_sistema
-ORDER BY 
+ORDER BY
     data_hora DESC
 LIMIT 20;
 
@@ -227,23 +227,23 @@ BEGIN
     END;
 
     START TRANSACTION;
-    SELECT 
+    SELECT
         t.fk_id_disciplina,
         t.fk_id_semestre,
         t.vagas_ocupadas,
         t.maximo_vagas,
         s.aberto_p_matricula
-    INTO 
+    INTO
         v_id_disciplina,
         v_id_semestre,
         v_vagas_ocupadas,
         v_maximo_vagas,
         v_semestre_aberto
-    FROM 
+    FROM
         turmas t
-    JOIN 
+    JOIN
         semestres s ON t.fk_id_semestre = s.id_semestre
-    WHERE 
+    WHERE
         t.id_turma = p_id_turma
     FOR UPDATE;
 
@@ -261,7 +261,7 @@ BEGIN
     INTO v_disciplinas_cursando
     FROM matriculas m
     JOIN turmas t ON m.fk_id_turma = t.id_turma
-    WHERE 
+    WHERE
         m.fk_id_aluno = p_id_aluno
         AND t.fk_id_semestre = v_id_semestre
         AND m.status = 'Cursando';
@@ -275,7 +275,7 @@ BEGIN
     INTO v_disciplina_ja_matriculada
     FROM matriculas m
     JOIN turmas t ON m.fk_id_turma = t.id_turma
-    WHERE 
+    WHERE
         m.fk_id_aluno = p_id_aluno
         AND t.fk_id_disciplina = v_id_disciplina
         AND t.fk_id_semestre = v_id_semestre;
@@ -288,10 +288,10 @@ BEGIN
     SELECT COUNT(pr.id_disciplina_prerequisito)
     INTO v_prerequisitos_nao_cumpridos
     FROM pre_requisitos pr
-    LEFT JOIN historico h ON h.fk_id_aluno = p_id_aluno 
+    LEFT JOIN historico h ON h.fk_id_aluno = p_id_aluno
                          AND h.fk_id_disciplina = pr.id_disciplina_prerequisito
                          AND h.status = 'Aprovado'
-    WHERE 
+    WHERE
         pr.id_disciplina_principal = v_id_disciplina
         AND h.id_historico IS NULL;
     IF v_prerequisitos_nao_cumpridos > 0 THEN
@@ -303,7 +303,7 @@ BEGIN
     VALUES (p_id_aluno, p_id_turma, 'Cursando', NULL);
 
     COMMIT;
-    
+
 END$$
 
 DELIMITER ;
@@ -325,10 +325,10 @@ BEGIN
     END IF;
 
     UPDATE matriculas
-    SET 
+    SET
         nota_final = p_nota_final,
         status = v_status
-    WHERE 
+    WHERE
         id_matricula = p_id_matricula;
 
 END$$
@@ -363,7 +363,7 @@ BEGIN
     FOR UPDATE;
 
     IF v_status_atual = 'Cursando' THEN
-    
+
         UPDATE matriculas
         SET status = 'Trancado'
         WHERE id_matricula = p_id_matricula;
@@ -374,15 +374,15 @@ BEGIN
 
         INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
         VALUES (
-            p_id_usuario, 
-            'Trancamento', 
-            'matriculas', 
-            NOW(), 
+            p_id_usuario,
+            'Trancamento',
+            'matriculas',
+            NOW(),
             CONCAT('Matrícula ID ', p_id_matricula, ' (Aluno ID ', v_id_aluno, ') trancada.')
         );
 
         COMMIT;
-        
+
     ELSE
         ROLLBACK;
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Erro: A matrícula não está com status "Cursando" e não pode ser trancada.';
@@ -403,23 +403,23 @@ BEGIN
     DELETE FROM historico WHERE fk_id_aluno = p_id_aluno;
 
     INSERT INTO historico (
-        fk_id_aluno, 
-        fk_id_disciplina, 
-        nota_final, 
-        status, 
+        fk_id_aluno,
+        fk_id_disciplina,
+        nota_final,
+        status,
         data_Conclusao
     )
-    SELECT 
+    SELECT
         m.fk_id_aluno,
         t.fk_id_disciplina,
         m.nota_final,
         m.status,
-        CURDATE() 
-    FROM 
+        CURDATE()
+    FROM
         matriculas m
-    JOIN 
+    JOIN
         turmas t ON m.fk_id_turma = t.id_turma
-    WHERE 
+    WHERE
         m.fk_id_aluno = p_id_aluno
         AND m.status = 'Aprovado';
 
@@ -459,7 +459,7 @@ BEGIN
     SELECT AVG(m.nota_final)
     INTO v_coeficiente
     FROM matriculas m
-    WHERE 
+    WHERE
         m.fk_id_aluno = p_id_aluno
         AND m.status IN ('Aprovado', 'Reprovado');
 
@@ -474,7 +474,7 @@ DELIMITER $$
 
 CREATE FUNCTION fn_ContarDisciplinasPendentes(
     p_id_aluno INT,
-    p_id_curso INT 
+    p_id_curso INT
 )
 RETURNS INT
 DETERMINISTIC
@@ -484,7 +484,7 @@ BEGIN
     DECLARE v_total_aprovadas INT;
     DECLARE v_id_curriculo INT;
 
-    SELECT id_curriculo 
+    SELECT id_curriculo
     INTO v_id_curriculo
     FROM curriculos
     WHERE fk_id_curso = p_id_curso
@@ -499,7 +499,7 @@ BEGIN
     SELECT COUNT(*)
     INTO v_total_aprovadas
     FROM historico
-    WHERE 
+    WHERE
         fk_id_aluno = p_id_aluno
         AND status = 'Aprovado';
 
@@ -526,7 +526,7 @@ BEGIN
     INTO v_lista_disciplinas
     FROM historico h
     JOIN disciplinas d ON h.fk_id_disciplina = d.id_disciplina
-    WHERE 
+    WHERE
         h.fk_id_aluno = p_id_aluno
         AND h.status = 'Aprovado';
 
@@ -552,7 +552,7 @@ BEGIN
     INTO v_total_horas
     FROM historico h
     JOIN disciplinas d ON h.fk_id_disciplina = d.id_disciplina
-    WHERE 
+    WHERE
         h.fk_id_aluno = p_id_aluno
         AND h.status = 'Aprovado';
 
@@ -563,13 +563,13 @@ END$$
 DELIMITER ;
 
 
--- Triggers -- 
+-- Triggers --
 
 
 DELIMITER $$
 
 CREATE TRIGGER trg_AtualizarContagemVagas
-AFTER INSERT ON matriculas -- 
+AFTER INSERT ON matriculas --
 FOR EACH ROW
 BEGIN
     UPDATE turmas
@@ -595,7 +595,7 @@ BEGIN
     IF OLD.nome <> NEW.nome THEN
         SET v_descricao = CONCAT(v_descricao, 'Nome: "', OLD.nome, '"->"', NEW.nome, '". ');
     END IF;
-    
+
     IF OLD.cpf <> NEW.cpf THEN
         SET v_descricao = CONCAT(v_descricao, 'CPF: "', OLD.cpf, '"->"', NEW.cpf, '". ');
     END IF;
@@ -603,28 +603,28 @@ BEGIN
     IF OLD.email <> NEW.email THEN
         SET v_descricao = CONCAT(v_descricao, 'Email: "', OLD.email, '"->"', NEW.email, '". ');
     END IF;
-    
+
     IF OLD.data_nascimento <> NEW.data_nascimento THEN
         SET v_descricao = CONCAT(v_descricao, 'DataNascimento: "', OLD.data_nascimento, '"->"', NEW.data_nascimento, '". ');
     END IF;
-    
+
     IF OLD.fk_id_curso <> NEW.fk_id_curso THEN
         SET v_descricao = CONCAT(v_descricao, 'Curso: "', OLD.fk_id_curso, '"->"', NEW.fk_id_curso, '". ');
     END IF;
 
     IF OLD.nome <> NEW.nome OR OLD.cpf <> NEW.cpf OR OLD.email <> NEW.email OR OLD.data_nascimento <> NEW.data_nascimento OR OLD.fk_id_curso <> NEW.fk_id_curso THEN
         INSERT INTO log_sistema (
-            fk_usuario, 
-            acao, 
-            tabela_afetada, 
-            data_hora, 
+            fk_usuario,
+            acao,
+            tabela_afetada,
+            data_hora,
             descricao
         )
         VALUES (
-            NULL, 
-            'UPDATE - Auditoria', 
-            'Alunos', 
-            NOW(), 
+            NULL,
+            'UPDATE - Auditoria',
+            'Alunos',
+            NOW(),
             v_descricao
         );
     END IF;
@@ -640,7 +640,7 @@ AFTER INSERT ON alunos
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'INSERT', 'alunos', NOW(), 
+    VALUES (NULL, 'INSERT', 'alunos', NOW(),
             CONCAT('Novo aluno inserido. ID: ', NEW.id_aluno, ', Nome: ', NEW.nome));
 END$$
 DELIMITER ;
@@ -651,7 +651,7 @@ AFTER DELETE ON alunos
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'DELETE', 'alunos', NOW(), 
+    VALUES (NULL, 'DELETE', 'alunos', NOW(),
             CONCAT('Aluno ID ', OLD.id_aluno, ' (Nome: ', OLD.nome, ') deletado.'));
 END$$
 DELIMITER ;
@@ -665,7 +665,7 @@ AFTER INSERT ON professores
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'INSERT', 'professores', NOW(), 
+    VALUES (NULL, 'INSERT', 'professores', NOW(),
             CONCAT('Novo professor inserido. ID: ', NEW.id_professor, ', Nome: ', NEW.nome));
 END$$
 DELIMITER ;
@@ -676,8 +676,8 @@ AFTER UPDATE ON professores
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'UPDATE', 'professores', NOW(), 
-            CONCAT('Professor ID ', OLD.id_professor, ' atualizado. Detalhes: ', 
+    VALUES (NULL, 'UPDATE', 'professores', NOW(),
+            CONCAT('Professor ID ', OLD.id_professor, ' atualizado. Detalhes: ',
                    'Nome: ', OLD.nome, '->', NEW.nome, ', ',
                    'Titulacao: ', OLD.titulacao, '->', NEW.titulacao));
 END$$
@@ -690,12 +690,12 @@ AFTER DELETE ON professores
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'DELETE', 'professores', NOW(), 
+    VALUES (NULL, 'DELETE', 'professores', NOW(),
             CONCAT('Professor ID ', OLD.id_professor, ' (Nome: ', OLD.nome, ') deletado.'));
 END$$
 DELIMITER ;
 
--- cursos -- 
+-- cursos --
 
 DELIMITER $$
 CREATE TRIGGER trg_Log_Cursos_INSERT
@@ -703,7 +703,7 @@ AFTER INSERT ON cursos
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'INSERT', 'cursos', NOW(), 
+    VALUES (NULL, 'INSERT', 'cursos', NOW(),
             CONCAT('Novo curso inserido. ID: ', NEW.id_curso, ', Nome: ', NEW.nome));
 END$$
 DELIMITER ;
@@ -714,7 +714,7 @@ AFTER UPDATE ON cursos
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'UPDATE', 'cursos', NOW(), 
+    VALUES (NULL, 'UPDATE', 'cursos', NOW(),
             CONCAT('Curso ID ', OLD.id_curso, ' atualizado. Nome: ', OLD.nome, '->', NEW.nome));
 END$$
 DELIMITER ;
@@ -725,7 +725,7 @@ AFTER DELETE ON cursos
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'DELETE', 'cursos', NOW(), 
+    VALUES (NULL, 'DELETE', 'cursos', NOW(),
             CONCAT('Curso ID ', OLD.id_curso, ' (Nome: ', OLD.nome, ') deletado.'));
 END$$
 DELIMITER ;
@@ -738,7 +738,7 @@ AFTER INSERT ON disciplinas
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'INSERT', 'disciplinas', NOW(), 
+    VALUES (NULL, 'INSERT', 'disciplinas', NOW(),
             CONCAT('Nova disciplina inserida. ID: ', NEW.id_disciplina, ', Nome: ', NEW.nome));
 END$$
 DELIMITER ;
@@ -749,7 +749,7 @@ AFTER UPDATE ON disciplinas
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'UPDATE', 'disciplinas', NOW(), 
+    VALUES (NULL, 'UPDATE', 'disciplinas', NOW(),
             CONCAT('Disciplina ID ', OLD.id_disciplina, ' atualizada. Nome: ', OLD.nome, '->', NEW.nome));
 END$$
 DELIMITER ;
@@ -760,7 +760,7 @@ AFTER DELETE ON disciplinas
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'DELETE', 'disciplinas', NOW(), 
+    VALUES (NULL, 'DELETE', 'disciplinas', NOW(),
             CONCAT('Disciplina ID ', OLD.id_disciplina, ' (Nome: ', OLD.nome, ') deletada.'));
 END$$
 DELIMITER ;
@@ -773,7 +773,7 @@ AFTER INSERT ON curriculos
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'INSERT', 'curriculos', NOW(), 
+    VALUES (NULL, 'INSERT', 'curriculos', NOW(),
             CONCAT('Novo currículo inserido. ID: ', NEW.id_curriculo, ', Curso ID: ', NEW.fk_id_curso, ', Ano: ', NEW.ano_inicio));
 END$$
 DELIMITER ;
@@ -784,7 +784,7 @@ AFTER UPDATE ON curriculos
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'UPDATE', 'curriculos', NOW(), 
+    VALUES (NULL, 'UPDATE', 'curriculos', NOW(),
             CONCAT('Currículo ID ', OLD.id_curriculo, ' atualizado. Ano: ', OLD.ano_inicio, '->', NEW.ano_inicio));
 END$$
 DELIMITER ;
@@ -795,7 +795,7 @@ AFTER DELETE ON curriculos
 FOR EACH ROW
 BEGIN
     INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
-    VALUES (NULL, 'DELETE', 'curriculos', NOW(), 
+    VALUES (NULL, 'DELETE', 'curriculos', NOW(),
             CONCAT('Currículo ID ', OLD.id_curriculo, ' (Curso ID: ', OLD.fk_id_curso, ') deletado.'));
 END$$
 DELIMITER ;
@@ -822,7 +822,7 @@ BEGIN
             (SELECT fk_id_disciplina FROM turmas WHERE id_turma = NEW.fk_id_turma),
             NEW.nota_final,
             'Aprovado',
-            CURDATE() 
+            CURDATE()
         );
     END IF;
 END$$
@@ -833,21 +833,21 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE TRIGGER trg_AtualizarStatusAutomaticamente
-BEFORE INSERT ON matriculas 
+BEFORE INSERT ON matriculas
 FOR EACH ROW
 BEGIN
     DECLARE v_disciplinas_cursando INT DEFAULT 0;
     DECLARE v_id_semestre INT;
-    SELECT fk_id_semestre 
-    INTO v_id_semestre 
-    FROM turmas 
+    SELECT fk_id_semestre
+    INTO v_id_semestre
+    FROM turmas
     WHERE id_turma = NEW.fk_id_turma;
 
     SELECT COUNT(*)
     INTO v_disciplinas_cursando
     FROM matriculas m
     JOIN turmas t ON m.fk_id_turma = t.id_turma
-    WHERE 
+    WHERE
         m.fk_id_aluno = NEW.fk_id_aluno
         AND t.fk_id_semestre = v_id_semestre
         AND m.status = 'Cursando';
@@ -855,15 +855,15 @@ BEGIN
     IF v_disciplinas_cursando >= 6 THEN
         INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
         VALUES (
-            NULL, 
-            'MATRÍCULA BLOQUEADA', 
-            'matriculas', 
-            NOW(), 
-            CONCAT('Aluno ID ', NEW.fk_id_aluno, ' tentou se matricular na Turma ID ', NEW.fk_id_turma, 
+            NULL,
+            'MATRÍCULA BLOQUEADA',
+            'matriculas',
+            NOW(),
+            CONCAT('Aluno ID ', NEW.fk_id_aluno, ' tentou se matricular na Turma ID ', NEW.fk_id_turma,
                    ' (limite de 6 disciplinas "Cursando" atingido no semestre ID ', v_id_semestre, ').')
         );
-        
-        SIGNAL SQLSTATE '45000' 
+
+        SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Erro: Limite de 6 disciplinas em "Cursando" por semestre atingido. Operação registrada no log.';
     END IF;
 END$$
