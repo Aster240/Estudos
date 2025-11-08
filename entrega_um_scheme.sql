@@ -1,7 +1,5 @@
-CREATE DATABASE IF NOT EXISTS entrega_final_01_AER;
-USE entrega_final_01_AER;
-
-/* CRIAÇÃO DAS TABELAS */
+CREATE DATABASE IF NOT EXISTS entrega_nomeEquipe;
+USE entrega_nomeEquipe;
 
 CREATE TABLE professores(
     id_professor INT AUTO_INCREMENT PRIMARY KEY,
@@ -11,7 +9,7 @@ CREATE TABLE professores(
 );
 
 CREATE TABLE cursos(
-     id_curso INT AUTO_INCREMENT PRIMARY KEY, 
+    id_curso INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(128),
     coordenador VARCHAR(256),
     carga_horaria_total INT
@@ -20,7 +18,7 @@ CREATE TABLE cursos(
 CREATE TABLE alunos(
     id_aluno INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(256),
-    cpf VARCHAR(11) UNIQUE, 
+    cpf VARCHAR(11) UNIQUE NOT NULL,
     email VARCHAR(256),
     data_nascimento DATE,
     fk_id_curso INT,
@@ -42,8 +40,8 @@ CREATE TABLE disciplinas(
 );
 
 CREATE TABLE disciplinas_curriculos(
-    fk_id_curriculo INT,
-    fk_id_disciplina INT,
+    fk_id_curriculo INT NOT NULL,
+    fk_id_disciplina INT NOT NULL,
     PRIMARY KEY (fk_id_curriculo, fk_id_disciplina),
     periodo_ideal INT,
     CONSTRAINT fk_id_curriculo_DspCrc FOREIGN KEY (fk_id_curriculo) REFERENCES curriculos(id_curriculo),
@@ -66,9 +64,9 @@ CREATE TABLE semestres(
 
 CREATE TABLE turmas(
     id_turma INT PRIMARY KEY AUTO_INCREMENT,
-    fk_id_disciplina INT,
-    fk_id_professor INT,
-    fk_id_semestre INT,
+    fk_id_disciplina INT NOT NULL,
+    fk_id_professor INT NOT NULL,
+    fk_id_semestre INT NOT NULL,
     maximo_vagas INT,
     vagas_ocupadas INT DEFAULT 0, 
     CONSTRAINT fk_id_disciplina_turmas FOREIGN KEY (fk_id_disciplina) REFERENCES disciplinas(id_disciplina),
@@ -78,8 +76,8 @@ CREATE TABLE turmas(
 
 CREATE TABLE matriculas(
     id_matricula INT PRIMARY KEY AUTO_INCREMENT,
-    fk_id_aluno INT,
-    fk_id_turma INT,
+    fk_id_aluno INT NOT NULL,
+    fk_id_turma INT NOT NULL,
     status VARCHAR(20),
     nota_final DECIMAL(4,2),
     CONSTRAINT fk_id_aluno_matriculas FOREIGN KEY (fk_id_aluno) REFERENCES alunos(id_aluno),
@@ -89,8 +87,8 @@ CREATE TABLE matriculas(
 
 CREATE TABLE historico(
     id_historico INT PRIMARY KEY AUTO_INCREMENT,
-    fk_id_aluno INT,
-    fk_id_disciplina INT,
+    fk_id_aluno INT NOT NULL,
+    fk_id_disciplina INT NOT NULL,
     nota_final DECIMAL(4,2),
     status VARCHAR(20),
     data_Conclusão DATE,
@@ -108,7 +106,7 @@ CREATE TABLE usuarios(
 
 CREATE TABLE log_sistema(
     id_log INT PRIMARY KEY AUTO_INCREMENT,
-    fk_usuario INT,
+    fk_usuario INT NOT NULL,
     acao VARCHAR (100),
     tabela_afetada VARCHAR(100),
     data_hora DATETIME,
