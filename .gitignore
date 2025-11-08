@@ -1,7 +1,7 @@
 # .gitignore
 
 # Segredos secretos
-.env
+
 
 # Ambiente virtual
 venv/
