@@ -12,3 +12,11 @@ source venv/bin/activate
 ```python3
 pip install mysql-connector-python python-dotenv
 ```
+
+arquivo que tem que ser criado dentro de backend.
+```.env
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=
+DB_NAME=entrega_final_grupo05
+```
