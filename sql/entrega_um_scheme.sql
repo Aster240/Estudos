@@ -106,7 +106,7 @@ CREATE TABLE usuarios(
 
 CREATE TABLE log_sistema(
     id_log INT PRIMARY KEY AUTO_INCREMENT,
-    fk_usuario INT NOT NULL,
+    fk_usuario INT,
     acao VARCHAR (100),
     tabela_afetada VARCHAR(100),
     data_hora DATETIME,
