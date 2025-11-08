@@ -1,10 +1,10 @@
 from calls.call_viewers import Buscar_boletim_por_aluno, Buscar_todos_boletins
-from call.praticando import *
+from calls.praticando import *
 
 def main():
     print('inicialização do menu:(')
     
-    test();
+    test()
 
 
 if __name__ == "__main__":
