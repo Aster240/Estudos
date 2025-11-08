@@ -1,5 +1,5 @@
 from connect import get_db_connection
-
+import mysql.connector
 
 def Buscar_boletim_por_aluno(id_aluno):
     print(f'--- BUSCANDO O ALUNO COM O ID == {id_aluno}')
@@ -49,16 +49,16 @@ def Buscar_todos_boletins():
                     print('Nenhum boletim encontrado no sistema')
                     return
                 
-            aluno_atual = ''
-            for (aluno, disciplina, prof, nota, status) in resultados:
-                if aluno != aluno_atual:
-                    print('\n=================================')
-                    print(f'Boletim para o aluno: {aluno}')
-                    print('=================================')
-                    aluno_atual = aluno
+                aluno_atual = ''
+                for (aluno, disciplina, prof, nota, status) in resultados:
+                    if aluno != aluno_atual:
+                        print('\n=================================')
+                        print(f'Boletim para o aluno: {aluno}')
+                        print('=================================')
+                        aluno_atual = aluno
 
-                print(f"  - Disciplina: {disciplina} (Prof: {prof})")
-                print(f"    Nota: {nota} | Status: {status}\n")
+                    print(f"  - Disciplina: {disciplina} (Prof: {prof})")
+                    print(f"    Nota: {nota} | Status: {status}\n")
 
         except Exception as e:
             print(f"Erro ao consultar a view: {e}")
@@ -71,7 +71,7 @@ def buscar_turmas_disponiveis():
             print('falha na conexão do banco de dados')
             return
         
-        query = """SELECT id_turma,Disciplina, Professor, Semestre from vw_TurmasDisponiveis"""
+        query = """SELECT id_turma, Disciplina, Professor, Semestre, VagasRestantes from vw_TurmasDisponiveis"""
 
         with conn.cursor() as cursor:
             try:
@@ -83,16 +83,18 @@ def buscar_turmas_disponiveis():
                 
                 print("Turmas com vagas no semestre atual:")
                 for(id_turma, disc, prof, sem, vagas) in resultados:
-                    print(f'[ID TURMA:{id_turma}] {disc} (Prof: {prof}) - Vagas: {vagas} (Sem: {})')
+                    
+                    print(f'[ID TURMA:{id_turma}] {disc} (Prof: {prof}) - Vagas: {vagas} (Sem: {sem})')
             except mysql.connector.Error as e:
-                print(f"Ero ao consultar a view: {e}")
+                print(f"Erro ao consultar a view: {e}")
 
 def buscar_desempenho_turmas():
-    print('--- Buscando o Desempenho das Turmas ---')        
+    print('\n--- Buscando o Desempenho das Turmas ---')        
 
     with get_db_connection() as conn:
         if not conn:
             print('falha ao conectar ao banco de dados')
+            return
 
         query="""SELECT Disciplina, Professor, Semestre, MediaNotas, TotalAprovados, TotalReprovados FROM vw_DesempenhoTurma"""
 
@@ -101,21 +103,22 @@ def buscar_desempenho_turmas():
                 cursor.execute(query)
                 resultados =  cursor.fetchall()
                 if not resultados:
-                    print('nenhum dado de desempenho enocntrado')
+                    print('nenhum dado de desempenho encontrado')
                     return
-                print('Desempenho das turmas concluídas')
-                for(disc, prof, sem, aprov, reprov) in resultados:
+                print('Desempenho das turmas concluídas:')
+                for(disc, prof, sem, media, aprov, reprov) in resultados:
                     print(f"  - {disc} (Prof: {prof}) - Semestre: {sem}")
                     print(f"    Média: {media:.2f} | Aprovados: {aprov} | Reprovados: {reprov}")
             except mysql.connector.Error as e:
                 print(f'erro a consultar a view: {e}')                    
 
 def buscar_logs_recentes():
-    print('--- Buscando Logs Recentes---')        
+    print('\n--- Buscando Logs Recentes ---')        
 
-    with get_db_connection as conn:
+    with get_db_connection() as conn: 
         if not conn:
             print('falha ao conectar ao banco de dados')
+            return 
 
         query="""SELECT id_log, fk_usuario, acao, tabela_afetada, data_hora FROM vw_LogAuditoria"""
 
@@ -124,10 +127,10 @@ def buscar_logs_recentes():
                 cursor.execute(query)
                 resultados =  cursor.fetchall()
                 if not resultados:
-                    print('nenhum log recente foi enocntrado')
+                    print('nenhum log recente foi encontrado')
                     return
-                print('Ultimas operações do sistema')
+                print('Ultimas operações do sistema:')
                 for (id_log, user, acao, tabela, data) in resultados:
                     print(f"  [{data}] ID: {id_log} | User: {user} | Ação: {acao} | Tabela: {tabela}")
             except mysql.connector.Error as e:
-                print(f'erro a consultar a view: {e}')   
+                print(f'erro a consultar a view: {e}')
