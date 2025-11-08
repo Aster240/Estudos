@@ -586,7 +586,7 @@ DELIMITER $$
 DROP TRIGGER IF EXISTS trg_AuditoriaAluno;
 
 CREATE TRIGGER trg_AuditoriaAluno_Completo
-AFTER UPDATE ON Alunos
+AFTER UPDATE ON alunos
 FOR EACH ROW
 BEGIN
     DECLARE v_descricao TEXT;
