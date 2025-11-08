@@ -799,3 +799,73 @@ BEGIN
             CONCAT('Currículo ID ', OLD.id_curriculo, ' (Curso ID: ', OLD.fk_id_curso, ') deletado.'));
 END$$
 DELIMITER ;
+
+
+
+DELIMITER $$
+
+CREATE TRIGGER trg_AtualizarHistoricoAutomaticamente
+AFTER UPDATE ON matriculas
+FOR EACH ROW
+BEGIN
+
+    IF NEW.status = 'Aprovado' AND OLD.status <> 'Aprovado' THEN
+        INSERT INTO historico (
+            fk_id_aluno,
+            fk_id_disciplina,
+            nota_final,
+            status,
+            data_Conclusao
+        )
+        VALUES (
+            NEW.fk_id_aluno,
+            (SELECT fk_id_disciplina FROM turmas WHERE id_turma = NEW.fk_id_turma),
+            NEW.nota_final,
+            'Aprovado',
+            CURDATE() 
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE TRIGGER trg_AtualizarStatusAutomaticamente
+BEFORE INSERT ON matriculas 
+FOR EACH ROW
+BEGIN
+    DECLARE v_disciplinas_cursando INT DEFAULT 0;
+    DECLARE v_id_semestre INT;
+    SELECT fk_id_semestre 
+    INTO v_id_semestre 
+    FROM turmas 
+    WHERE id_turma = NEW.fk_id_turma;
+
+    SELECT COUNT(*)
+    INTO v_disciplinas_cursando
+    FROM matriculas m
+    JOIN turmas t ON m.fk_id_turma = t.id_turma
+    WHERE 
+        m.fk_id_aluno = NEW.fk_id_aluno
+        AND t.fk_id_semestre = v_id_semestre
+        AND m.status = 'Cursando';
+
+    IF v_disciplinas_cursando >= 6 THEN
+        INSERT INTO log_sistema (fk_usuario, acao, tabela_afetada, data_hora, descricao)
+        VALUES (
+            NULL, 
+            'MATRÍCULA BLOQUEADA', 
+            'matriculas', 
+            NOW(), 
+            CONCAT('Aluno ID ', NEW.fk_id_aluno, ' tentou se matricular na Turma ID ', NEW.fk_id_turma, 
+                   ' (limite de 6 disciplinas "Cursando" atingido no semestre ID ', v_id_semestre, ').')
+        );
+        
+        SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Erro: Limite de 6 disciplinas em "Cursando" por semestre atingido. Operação registrada no log.';
+    END IF;
+END$$
+
+DELIMITER ;
