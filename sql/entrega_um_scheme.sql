@@ -91,7 +91,7 @@ CREATE TABLE historico(
     fk_id_disciplina INT NOT NULL,
     nota_final DECIMAL(4,2),
     status VARCHAR(20),
-    data_Conclusão DATE,
+    data_Conclusao DATE,
     CONSTRAINT fk_id_aluno_historico FOREIGN KEY (fk_id_aluno) REFERENCES alunos(id_aluno),
     CONSTRAINT fk_id_disciplina_historico FOREIGN KEY (fk_id_disciplina) REFERENCES disciplinas(id_disciplina)
 );
@@ -488,7 +488,7 @@ BEGIN
     INTO v_id_curriculo
     FROM curriculos
     WHERE fk_id_curso = p_id_curso
-    ORDER BY AnoInicio DESC, Versao DESC
+    ORDER BY ano_inicio DESC, Versao DESC
     LIMIT 1;
 
     SELECT COUNT(*)
