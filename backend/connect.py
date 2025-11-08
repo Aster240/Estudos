@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import errorcode
 import os #
 from dotenv import load_dotenv 
+from contextlib import contextmanager
 
 
 load_dotenv()
@@ -10,7 +11,7 @@ USER = os.getenv("DB_USER")
 PASS = os.getenv("DB_PASS")
 DB_NAME = os.getenv("DB_NAME")
 
-
+@contextmanager
 def get_db_connection():
     
     # Variável para a conexão
