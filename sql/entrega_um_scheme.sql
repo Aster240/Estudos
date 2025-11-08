@@ -117,7 +117,8 @@ CREATE TABLE log_sistema(
 -- Views -- 
 
 CREATE VIEW vw_BoletimAluno AS
-SELECT 
+SELECT
+    a.id_aluno,
     a.nome AS Aluno,
     s.codigo AS Semestre,
     d.nome AS Disciplina,
@@ -137,7 +138,7 @@ JOIN
 JOIN 
     semestres s ON t.fk_id_semestre = s.id_semestre;
 
-
+SELECT * FROM vw_BoletimAluno WHERE id_aluno = 1;
 
 CREATE VIEW vw_TurmasDisponiveis AS
 SELECT 
