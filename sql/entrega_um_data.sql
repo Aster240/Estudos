@@ -140,7 +140,7 @@ CALL sp_RegistrarMatricula(2, 8);
 CALL sp_RegistrarMatricula(4, 11);
 CALL sp_RegistrarMatricula(4, 13);
 CALL sp_RegistrarMatricula(5, 12);
-CALL sp_RegistrarMatricula(6, 7);
+-- CALL sp_RegistrarMatricula(6, 7); -- Deu erro e é para dar erro mesmo zéééééé
 CALL sp_RegistrarMatricula(6, 14);
 CALL sp_RegistrarMatricula(7, 14);
 
