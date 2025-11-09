@@ -28,7 +28,7 @@ Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento P
 ### 2\. Clonar o Repositório
 
 ```bash
-git clone [URL_DO_SEU_REPOSITORIO]
+git clone git@github.com:Aster240/Estudos.git
 cd Estudos/backend
 ```
 
