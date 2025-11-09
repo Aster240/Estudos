@@ -83,30 +83,23 @@ DB_USER=root
 DB_PASS=SUA_SENHA_AQUI
 DB_NAME=entrega_final_grupo05
 ```
-
-> **Nota:** O arquivo `.env` nunca deve ser enviado para o repositório (ele deve estar no seu `.gitignore`).
-
 -----
 
 ## Configuração do Banco de Dados (SQL)
 
 O backend Python se conecta a um banco de dados que deve ser previamente criado e populado usando o script SQL principal do projeto.
-
-1.  Inicie seu serviço de SGBD (MySQL, MariaDB, etc.).
-2.  Crie um banco de dados com o nome que você definiu em `DB_NAME` (ex: `entrega_final_grupo05`).
-3.  Execute o arquivo SQL principal (ex: `projeto_grupo_X.sql` ) para criar todas as tabelas, views, procedures e triggers
-
+Os arquivos no Estudos/SQL, utilização de source funciona com scheme e data.
 -----
 
 ## 📦Entregáveis do Projeto
 
 Conforme a especificação da atividade, os entregáveis finais deste projeto são:
 
-1.  **Arquivo SQL Completo (`projeto_grupo_X.sql`):** 
+1.  **Arquivo SQL Completo:** 
 
       * Contém DDL, DML (se houver), Views, Stored Procedures, Funções e Triggers
       * Deve ser autoexecutável em um banco de dados limpo
-2.  **Relatório PDF (`relatorio_grupo_X.pdf`):** 
+2.  **Relatório PDF**
 
       * DER completo e descrição das tabelas
       * Explicação detalhada da lógica de procedures, funções e triggers
